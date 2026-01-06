@@ -6,7 +6,7 @@ from PIL import Image
 import os
 from pathlib import Path
 from scipy.signal import istft, spectrogram, stft
-from misc import read_clean_wav
+from source.misc import read_clean_wav
 
 
 """ Removes background noise form spectogram data """

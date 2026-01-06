@@ -2,8 +2,7 @@
 from datetime import datetime, timedelta
 import glob
 import os
-from misc import get_dirs_wav
-import log
+import source.log
 import csv
 import sys
 import math
@@ -11,8 +10,8 @@ import pandas as pd
 from ultralytics import YOLO
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from misc import read_clean_wav
-from predict import recording_to_predict
+from source.misc import read_clean_wav, get_dirs_wav
+from source.predict import recording_to_predict
 
 """ Main function to process all wav files """
 def main(

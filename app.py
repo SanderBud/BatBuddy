@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import filedialog, StringVar, Label, Button, ttk
 import threading
@@ -7,18 +6,6 @@ import os
 import sys
 
 from main import main
-
-class TextRedirector:
-    def __init__(self, widget):
-        self.widget = widget
-
-    def write(self, msg):
-        self.widget.insert(tk.END, msg)
-        self.widget.see(tk.END)
-
-    def flush(self):
-        pass
-
 
 class App:
     """ Initilising app """

@@ -2,10 +2,10 @@
 import ntpath
 import os
 from pathlib import Path
-import visualise as vis
+import source.visualise as vis
 import torch
 import warnings
-from misc import read_clean_wav
+from source.misc import read_clean_wav
 
 warnings.filterwarnings("ignore", "You are using `torch.load` with `weights_only=False`*.")
 
