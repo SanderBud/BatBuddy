@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 import glob
 import os
-import source.log
+import source.log as log
 import csv
 import sys
 import math
@@ -12,6 +12,8 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from source.misc import read_clean_wav, get_dirs_wav
 from source.predict import recording_to_predict
+from source.postprocess import overlap_tidy
+
 
 """ Main function to process all wav files """
 def main(
@@ -19,7 +21,7 @@ def main(
     log_path, # False or name of dir where to store/find log file
     msg_queue=None, 
     cancel_event=None,
-    model_path=r"data\models\0016_best.pt", # Location of YOLOv8 model
+    model_path=r"model\0016_best.pt", # Location of YOLOv8 model
     files_per_batch=10_000, # Number of recordings checked before writing to output file
     output_name=False, # False or name of output name. Output name will be supplemented with the recording file index of which the output is stored in that specific file
     recursive=True, # True (if all folders should be checked recursively for wav files) or False (if only wav files in the folder paths as assigned in 'dir_list' should be analysed)
@@ -126,10 +128,15 @@ def main(
 
             output_name_path = os.path.join(dir, output_name_new)
             
-            with open(output_name_path, mode='w', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=["filename", "filepath", "category", "confidence", "start_time_ms", "end_time_ms", "freq_min", "freq_max"])
-                writer.writeheader()
-                writer.writerows(csv_data_total)
+            # with open(output_name_path, mode='w', newline='', encoding='utf-8') as file:
+            #     writer = csv.DictWriter(file, fieldnames=["filename", "filepath", "category", "confidence", "start_time_ms", "end_time_ms", "freq_min", "freq_max"])
+            #     writer.writeheader()
+            #     writer.writerows(csv_data_total)
+
+            df_total = pd.DataFrame(csv_data_total)
+            df_total_tidy = overlap_tidy(df_total, threshold=5)
+
+            df_total_tidy.to_csv(output_name_path, index=False, encoding='utf-8')
 
             time_batch = datetime.now() - start_time
             formatted_time = str(timedelta(seconds=int(time_batch.total_seconds())))

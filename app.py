@@ -132,7 +132,7 @@ class App:
         self.cancel_event.clear()
         self.button_cancel.config(state="normal")   
         self.button_start.config(state="disabled")  
-
+        self.msg_log_output.delete('1.0', END)
         self.msg_update_var.set("Initialising...")
 
         self.worker = threading.Thread(

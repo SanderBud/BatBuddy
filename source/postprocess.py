@@ -37,6 +37,10 @@ def merge_via_graph(g):
 def overlap_tidy(df, threshold=5):
     df = df.copy()
 
+    # Ensure numeric columns
+    num_cols = ['start_time_ms', 'end_time_ms', 'confidence']
+    df[num_cols] = df[num_cols].apply(pd.to_numeric, errors='coerce')
+
     # Only keep Feeding buzz and Social call categories
     df = df[df['category'] != "Other"]
 
