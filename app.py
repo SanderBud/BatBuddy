@@ -37,6 +37,10 @@ class App:
         button_browse_multi = Button(master=self.button_browse_frame, text="Select Multiple Folders", command=self.select_folders_multi)       
         button_browse_multi.pack(side="left")
 
+        info = tk.Label(master=self.button_browse_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
+        info.pack(side="top", padx=10)
+        ToolTip(info, "You can select one folder at a time. Opens multiple windows. \nCancel folder browsing to complete folder selection and continue with the analysis")
+
         lbl1 = Label(master=self.frame, textvariable=self.dir_var, bg="white", fg="#6E6E6E", justify="left")                              
         lbl1.grid(row=1, column=0, padx=25, pady=5, sticky="w")
 
@@ -132,7 +136,7 @@ class App:
         self.cancel_event.clear()
         self.button_cancel.config(state="normal")   
         self.button_start.config(state="disabled")  
-        self.msg_log_output.delete('1.0', END)
+        self.msg_log_output.delete('1.0', tk.END)
         self.msg_update_var.set("Initialising...")
 
         self.worker = threading.Thread(
@@ -186,6 +190,36 @@ class App:
         self.msg_current_folder_var.set("")
         self.msg_update_var.set("")
 
+
+class ToolTip:
+    def __init__(self, widget, text, delay=500):
+        self.widget, self.text, self.delay = widget, text, delay
+        self.tip = None
+        self.after_id = None
+        widget.bind("<Enter>", self._schedule)
+        widget.bind("<Leave>", self._hide)
+
+    def _schedule(self, _):
+        self.after_id = self.widget.after(self.delay, self._show)
+
+    def _show(self):
+        if self.tip or not self.text:
+            return
+        x, y = self.widget.winfo_pointerxy()
+        self.tip = tk.Toplevel(self.widget)
+        self.tip.wm_overrideredirect(True)
+        self.tip.wm_geometry(f"+{x+10}+{y+10}")
+        tk.Label(self.tip, text=self.text, justify="left",
+                 background="#ffffe0", relief="solid", borderwidth=1,
+                 font=("Segoe UI", 9)).pack(padx=5, pady=3)
+
+    def _hide(self, _):
+        if self.after_id:
+            self.widget.after_cancel(self.after_id)
+            self.after_id = None
+        if self.tip:
+            self.tip.destroy()
+            self.tip = None
 
 
 if __name__ == "__main__":
