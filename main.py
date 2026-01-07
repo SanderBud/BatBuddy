@@ -115,7 +115,7 @@ def main(
                         estimated_time_left = time_per_file * remaining_files
 
                         if app: 
-                            msg_queue.put(("progress", f"{f"Analysing files {start_idx+1} - {stop_idx}... "}: Processed {counter}/{index_file_paths_len} files... ETA: {str(timedelta(seconds=int(estimated_time_left)))}"))
+                            msg_queue.put(("progress", f"Analysing files {start_idx+1} - {stop_idx}... : Processed {counter}/{index_file_paths_len} files... ETA: {str(timedelta(seconds=int(estimated_time_left)))}"))
                         else:
                             sys.stdout.write(f"\r{print_batch_message} Processed {counter}/{index_file_paths_len} files... Estimated time left: {str(timedelta(seconds=int(estimated_time_left)))} ")
                             sys.stdout.flush()
