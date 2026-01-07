@@ -37,9 +37,9 @@ class App:
         button_browse_multi = Button(master=self.button_browse_frame, text="Select Multiple Folders", command=self.select_folders_multi)       
         button_browse_multi.pack(side="left")
 
-        info = tk.Label(master=self.button_browse_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
-        info.pack(side="top", padx=10)
-        ToolTip(info, "You can select one folder at a time. Opens multiple windows. \nCancel folder browsing to complete folder selection and continue with the analysis")
+        info_browse = tk.Label(master=self.button_browse_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
+        info_browse.pack(side="top", padx=10)
+        ToolTip(info_browse, "You can select one folder at a time. Opens multiple windows. \nCancel folder browsing to complete folder selection and continue with the analysis")
 
         lbl1 = Label(master=self.frame, textvariable=self.dir_var, bg="white", fg="#6E6E6E", justify="left")                              
         lbl1.grid(row=1, column=0, padx=25, pady=5, sticky="w")
@@ -48,10 +48,33 @@ class App:
         sp1 = ttk.Separator(self.frame, orient="horizontal")
         sp1.grid(row=2, column=0, padx=25, pady=5, sticky="ew")
 
-        # Other parameters (recursive, log file location)
+        # Other parameters (recursive, cores)
+        ## Recursive analysis of folders
         self.var_recursive = tk.BooleanVar(value=False)
         checkbox_recursive = tk.Checkbutton(self.frame, text="Include subfolders in analysis", variable=self.var_recursive, onvalue=True, offvalue=False, bg="white")
         checkbox_recursive.grid(row=3, column=0, padx=25, pady=5, sticky="w")
+
+        ## Cores
+        self.cores_frame = tk.Frame(self.frame, bg="white")
+        self.cores_frame.grid(row=4, column=0, padx=15, pady=0, sticky="w")
+        self.var_cores = tk.IntVar(value=8)
+        lbl_cores = tk.Label(master=self.cores_frame, text="Parallel processes", bg="white")
+        lbl_cores.pack(side="left", padx=10, pady=10)
+
+        cores = list(range(1, (os.cpu_count() or 64) + 1))
+
+        spin_cores = ttk.Combobox(
+            self.cores_frame,
+            textvariable=self.var_cores,
+            values=cores,
+            width=5,
+            state="readonly"
+        )
+        spin_cores.pack(side="left", padx=10, pady=10)
+
+        info_cores = tk.Label(self.cores_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
+        info_cores.pack(side="top", padx=10)
+        ToolTip(info_cores, "Select number of logical processors the tool can use to analyse the recordings in parallel. \nUse a lower number of processors when you still need to use the computer for other tasks.")
 
         # Seperator line 
         sp2 = ttk.Separator(self.frame, orient="horizontal")
@@ -60,7 +83,7 @@ class App:
 
         # Start analysis button 
         self.button_frame = tk.Frame(self.frame, bg="white")
-        self.button_frame.grid(row=6, column=0, padx=25, pady=15, sticky="w")
+        self.button_frame.grid(row=7, column=0, padx=25, pady=15, sticky="w")
 
         self.manager = Manager()
         self.start_event = self.manager.Event()
@@ -76,21 +99,21 @@ class App:
         ## Update label
         self.msg_update_var = tk.StringVar()
         self.msg_update_label = tk.Label(self.frame, textvariable=self.msg_update_var, bg="white")
-        self.msg_update_label.grid(row=7, column=0, sticky="w", padx=25, pady=3)
+        self.msg_update_label.grid(row=8, column=0, sticky="w", padx=25, pady=3)
         
         ## Current folder label
         self.msg_current_folder_var = tk.StringVar()
         self.msg_current_folder_label = tk.Label(self.frame, textvariable=self.msg_current_folder_var, bg="white")
-        self.msg_current_folder_label.grid(row=8, column=0, sticky="w", padx=25, pady=3)
+        self.msg_current_folder_label.grid(row=9, column=0, sticky="w", padx=25, pady=3)
 
         ## Progress label
         self.msg_progress_var = tk.StringVar()
         self.msg_progress_label = tk.Label(self.frame, textvariable=self.msg_progress_var, bg="white")
-        self.msg_progress_label.grid(row=9, column=0, sticky="w", padx=25, pady=3)
+        self.msg_progress_label.grid(row=10, column=0, sticky="w", padx=25, pady=3)
 
         ## Log text label
         self.msg_log_output = tk.Text(self.frame, height=20, width=100, font=("Calibri", 10))
-        self.msg_log_output.grid(row=10, column=0, padx=25, pady=5, sticky="nsew")
+        self.msg_log_output.grid(row=11, column=0, padx=25, pady=5, sticky="nsew")
 
         ## Queue for messages from script
         self.msg_queue = self.manager.Queue()
