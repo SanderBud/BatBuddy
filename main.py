@@ -42,8 +42,8 @@ def main(
         if app: msg_queue.put(("update", f"No folders with wav-files found"))
         return
 
-    print(f"Starting analysis. Total dirs: {len(dir_list_check)}")
-    if app: msg_queue.put(("update", f"Starting analysis of {len(dir_list_check)} folders"))
+    print(f"Starting analysis using {proc} logical processors. Total dirs: {len(dir_list_check)}")
+    if app: msg_queue.put(("update", f"Starting analysis of {len(dir_list_check)} folders using {proc} logical processors"))
 
 
     """ Analyse recordings per directory """

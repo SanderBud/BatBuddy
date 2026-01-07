@@ -38,7 +38,7 @@ class App:
         button_browse_multi.pack(side="left")
 
         info_browse = tk.Label(master=self.button_browse_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
-        info_browse.pack(side="top", padx=10)
+        info_browse.pack(side="left", padx=10)
         ToolTip(info_browse, "You can select one folder at a time. Opens multiple windows. \nCancel folder browsing to complete folder selection and continue with the analysis")
 
         lbl1 = Label(master=self.frame, textvariable=self.dir_var, bg="white", fg="#6E6E6E", justify="left")                              
@@ -73,7 +73,7 @@ class App:
         spin_cores.pack(side="left", padx=10, pady=10)
 
         info_cores = tk.Label(self.cores_frame, text="ℹ", fg="blue", bg="white", cursor="question_arrow")
-        info_cores.pack(side="top", padx=10)
+        info_cores.pack(side="left", padx=0, pady=10)
         ToolTip(info_cores, "Select number of logical processors the tool can use to analyse the recordings in parallel. \nUse a lower number of processors when you still need to use the computer for other tasks.")
 
         # Seperator line 
@@ -164,7 +164,7 @@ class App:
 
         self.worker = threading.Thread(
             target=main,
-            kwargs={"dir_list": self.dirs, "recursive": self.var_recursive.get(), "log_path": False, "msg_queue": self.msg_queue, "cancel_event": self.cancel_event, "app": True},
+            kwargs={"dir_list": self.dirs, "recursive": self.var_recursive.get(), "log_path": False, "msg_queue": self.msg_queue, "cancel_event": self.cancel_event, "proc": self.var_cores.get(), "app": True},
             daemon=True
         )
         self.worker.start()
