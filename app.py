@@ -126,9 +126,6 @@ class App:
         self.msg_progress_label.grid(row=0, column=0, sticky="ew", padx=25, pady=3)
 
         ## Log text label
-        # sp3 = ttk.Separator(self.frame, orient="horizontal")
-        # sp3.grid(row=11, column=0, padx=25, pady=5, sticky="ew")
-
         log_frame = ttk.LabelFrame(analysis_frame, text="Log")
         log_frame.grid(row=4, column=0, padx=25, pady=10, sticky="nsew")
 
@@ -138,9 +135,6 @@ class App:
         self.msg_log_output = tk.Text(
             log_frame,
             height=6,
-            # width=100,
-            # font=("Calibri", 10),
-            # background=bg,
             relief="flat",
             borderwidth=0,
             wrap="word"
@@ -286,9 +280,7 @@ class ToolTip:
 if __name__ == "__main__":
     root = tk.Tk()
 
-    # sv_ttk.use_light_theme()
     sv_ttk.set_theme("light")
     
-    # root = ThemedTk(theme="arc")
     app = App(root)
     root.mainloop()
