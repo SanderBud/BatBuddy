@@ -54,7 +54,7 @@ def main(
         start_time_dir = datetime.now()
         
         if app: 
-            msg_queue.put(("update", f"Analysing... Working on folder {count_dir} of {len(dir_list_check)}"))
+            msg_queue.put(("update", f"Analysing... Working on folder {count_dir} of {len(dir_list_check)} using {proc} logical processors"))
             msg_queue.put(("current_folder", f"Current folder: {dir}"))
             msg_queue.put(("progress", ""))
 
