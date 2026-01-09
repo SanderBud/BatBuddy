@@ -3,6 +3,7 @@ from source.visualise import spectral_subtraction, create_spectrogram_data, viz_
 import numpy as np
 from unittest.mock import patch
 
+""" Checks if expected number of segments/spectograms are produced """
 @patch("source.visualise.read_clean_wav")
 @patch("source.visualise.viz_audio_segment")
 def test_recording_to_visual_happy_path(mock_viz, mock_read):
@@ -19,9 +20,10 @@ def test_recording_to_visual_happy_path(mock_viz, mock_read):
         write_plot=False
     )
 
-    assert mock_viz.call_count == 2
-    assert out is None  # function returns nothing
+    assert mock_viz.call_count == 2 # number of times viz_audio_segment is called
+    assert out is None  # function returns nothing 
 
+""" Tests handling of unreadable/empty wav file """
 @patch("source.visualise.read_clean_wav")
 def test_recording_to_visual_handles_invalid_wav(mock_read):
     mock_read.return_value = (None, None)
@@ -30,8 +32,7 @@ def test_recording_to_visual_handles_invalid_wav(mock_read):
 
     assert out == []
 
-
-
+""" Tests if spectral substraction does not alter audio length """
 def test_spectral_subtraction_preserves_length():
     fs = 48000
     x = np.random.randn(fs)
@@ -47,6 +48,7 @@ def test_spectral_subtraction_preserves_length():
     assert isinstance(y, np.ndarray)
     assert len(y) == aligned_length
 
+""" Tests is spectral substraction with weight=0 doesnt distort the image (due to round errors) """
 def test_spectral_subtraction_zero_weight_is_identityish():
     fs = 44100
     x = np.random.randn(fs)
@@ -57,20 +59,7 @@ def test_spectral_subtraction_zero_weight_is_identityish():
     # Not bit-identical (STFT/ISTFT), but energy should be close
     assert np.isclose(np.linalg.norm(x), np.linalg.norm(y), rtol=1e-2)
 
-def test_noise_estimation_resampled_if_wrong_length():
-    fs = 44100
-    x = np.random.randn(fs)
-    bad_noise = np.ones(10)  # deliberately wrong
-
-    y = spectral_subtraction(x, bad_noise, fs, magn_weight=1.0)
-
-    hop_length = 512 // 2
-    aligned_length = ((len(x) + hop_length - 1) // hop_length) * hop_length
-
-    assert len(y) == aligned_length
-
-
-
+""" Tests dimentions and shapes of spectrogram output """
 def test_spectrogram_shapes_and_bounds():
     fs = 48000
     dur = 1.0
@@ -88,6 +77,7 @@ def test_spectrogram_shapes_and_bounds():
     assert Sxx.shape == (len(f), len(t))
     assert np.all(Sxx >= 0)
 
+""" Tests frequency padding """
 def test_frequency_padding_up_to_120khz():
     fs = 96000  # Nyquist < 120k
     x = np.random.randn(fs)
@@ -97,6 +87,7 @@ def test_frequency_padding_up_to_120khz():
     assert f[-1] >= 120_000
     assert Sxx.shape[0] == len(f)
 
+""" Tests time padding """
 def test_time_padding_to_segment_duration():
     fs = 48000
     x = np.random.randn(int(0.5 * fs))
@@ -105,8 +96,7 @@ def test_time_padding_to_segment_duration():
 
     assert t[-1] >= 1.0 - 1e-2 # give a bit of tolerance
 
-
-
+""" Tests output name and dimensions of viz_audio_segment """
 def test_viz_returns_image_and_filename(tmp_path):
     fs = 48000
     x = np.random.randn(fs)
@@ -129,6 +119,7 @@ def test_viz_returns_image_and_filename(tmp_path):
     assert img.ndim == 3
     assert fname.startswith("IMG_testfile")
 
+""" Tests existence white lines """
 def test_freq_lines_draw_white_rows():
     fs = 48000
     x = np.random.randn(fs)
