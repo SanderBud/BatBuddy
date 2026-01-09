@@ -8,14 +8,13 @@ import main
 from pathlib import Path
 
 
-
+""" Helper YOLO object for testing """
 class DummyYOLO:
     def __init__(self, model_path):
         self.model_path = model_path
 
-
+""" Helper: Context manager that mimics ProcessPoolExecutor but runs jobs synchronously """
 class DummyExecutor:
-    """Context manager that mimics ProcessPoolExecutor but runs jobs synchronously"""
     def __init__(self, *args, **kwargs):
         pass
 
@@ -29,12 +28,8 @@ class DummyExecutor:
         # return generator that calls func synchronously for each arg
         return (func(i) for i in iterable)
 
-
+""" Helper: Returns a fake recording_to_predict function that ignores extra kwargs (partial will add them) """
 def make_fake_recording_to_predict(return_per_file):
-    """
-    Return a fake recording_to_predict function that ignores extra kwargs (partial will add them).
-    return_per_file can be a callable(filepath)->list or a static list to return for every file.
-    """
     if callable(return_per_file):
         def _f(filepath, *args, **kwargs):
             return return_per_file(filepath)
@@ -43,9 +38,8 @@ def make_fake_recording_to_predict(return_per_file):
             return return_per_file
     return _f
 
-
+""" Test if correctly handled where no dirs are found in the log file """
 def test_no_dirs_found(monkeypatch, capsys):
-    """If log.logging (dir check) returns empty, main should print and return early."""
     monkeypatch.setattr(main, "YOLO", DummyYOLO)
     monkeypatch.setattr(main, "get_dirs_wav", lambda head_dir_list: head_dir_list)
     monkeypatch.setattr(main.log, "logging", lambda path, dirs: [])
@@ -56,8 +50,8 @@ def test_no_dirs_found(monkeypatch, capsys):
     assert result is None
 
 
+""" When dir exists but no wav files are found, main prints and (with app=True) posts msg_queue progress """
 def test_no_wav_files_in_dir(monkeypatch, capsys):
-    """When dir exists but no wav files are found, main prints and (with app=True) posts msg_queue progress."""
     monkeypatch.setattr(main, "YOLO", DummyYOLO)
     monkeypatch.setattr(main, "get_dirs_wav", lambda head_dir_list: ["/fake/dir"])
     monkeypatch.setattr(main.log, "logging", lambda path, dirs: ["/fake/dir"])
@@ -80,7 +74,7 @@ def test_no_wav_files_in_dir(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert "No wav-files found" in captured.out or any("No wav-files found" in str(m) for m in mq.msgs)
 
-
+""" Tests for storing output and logging """
 def test_process_single_dir_writes_output_and_updates_log(tmp_path, monkeypatch):
     proc_dir = tmp_path / "proc_dir"
     proc_dir.mkdir()
