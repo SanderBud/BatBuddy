@@ -9,7 +9,7 @@ from scipy.signal import butter, lfilter
 
 """ Reads recording (with high-pass filter and error checks) """
 def read_clean_wav(filepath): 
-    warnings.filterwarnings("ignore", category=WavFileWarning) # Throws warning for many wav files because it doesnt recognise the metadata
+    warnings.filterwarnings("ignore", category=WavFileWarning) # Throws warning for many wav files because it doesnt recognise the metadata. Audio data itself is still fine though
     
     # Load file
     try:
@@ -24,6 +24,8 @@ def read_clean_wav(filepath):
         with open(os.path.join(os.path.dirname(filepath), "corrupted_files_log.txt"), "a") as log:
             log.write(os.path.basename(filepath) + "\t" + str(e) + "\n")
         return None, None
+
+    if Audiodata.ndim == 2: Audiodata = Audiodata.mean(axis=1) # convert stereo to mono
 
     # High-pass filter
     cutoff = 15_000 # 15kHz

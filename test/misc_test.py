@@ -3,15 +3,15 @@ import numpy as np
 import pytest
 from scipy.io.wavfile import write
 import os
-import source.misc
+from source.misc import read_clean_wav, get_dirs_wav
 
 """ read_clean_wav tests """ 
-def make_wav(path, fs=192000, duration=0.01):
+def make_wav(path, fs=192000, duration=0.01): # make mock wav file
     t = np.linspace(0, duration, int(fs * duration), endpoint=False)
     sig = (0.5 * np.sin(2 * np.pi * 20000 * t)).astype(np.float32)
     write(path, fs, sig)
 
-def test_read_valid_wav(tmp_path):
+def test_read_valid_wav(tmp_path): # check if reading of mock file is correct
     wav = tmp_path / "test.wav"
     make_wav(wav)
 
@@ -22,7 +22,7 @@ def test_read_valid_wav(tmp_path):
     assert audio.ndim == 1
     assert np.isclose(np.max(np.abs(audio)), 1.0)
 
-def test_empty_wav_logs_and_returns_none(tmp_path):
+def test_empty_wav_logs_and_returns_none(tmp_path): # check error handling empty wav file
     wav = tmp_path / "empty.wav"
     write(wav, 192000, np.array([], dtype=np.float32))
 
@@ -34,7 +34,7 @@ def test_empty_wav_logs_and_returns_none(tmp_path):
     assert log.exists()
     assert "File does not contain audio data" in log.read_text()
 
-def test_nonexistent_file_logs_error(tmp_path):
+def test_nonexistent_file_logs_error(tmp_path): # check logging when corrupted or empty file is found
     fake = tmp_path / "nope.wav"
 
     fs, audio = read_clean_wav(fake)
@@ -45,11 +45,11 @@ def test_nonexistent_file_logs_error(tmp_path):
     assert log.exists()
     assert "No such file" in log.read_text() or "cannot find" in log.read_text().lower()
 
-def test_highpass_removes_low_freq(tmp_path):
+def test_highpass_removes_low_freq(tmp_path): # check high pass filtering
     fs = 192000
     t = np.linspace(0, 0.01, int(fs * 0.01), endpoint=False)
-    low = np.sin(2 * np.pi * 1000 * t)      # should be attenuated
-    high = np.sin(2 * np.pi * 30000 * t)    # should survive
+    low = np.sin(2 * np.pi * 1000 * t)      
+    high = np.sin(2 * np.pi * 30000 * t)    
     sig = (low + high).astype(np.float32)
 
     wav = tmp_path / "mix.wav"
