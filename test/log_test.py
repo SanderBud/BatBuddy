@@ -6,6 +6,7 @@ from pathlib import Path
 
 from source.log import read_log_file, log_file_correctness_check, logging
 
+""" Tests on reading df """
 def test_read_log_file_success(tmp_path):
     p = tmp_path / "log.csv"
     p.write_text("dir,done\n/a,yes\n/b,no\n")
@@ -32,6 +33,7 @@ def test_read_log_file_parser_error(monkeypatch, capsys):
     assert df is None
     assert "could not be parsed" in out
 
+""" Tests on correctness layout log csv """
 def test_log_file_correctness_check_valid():
     df = pd.DataFrame({"dir": ["/a", "/b"], "done": ["yes", "no"]})
     # Should not raise
@@ -57,6 +59,7 @@ def test_log_file_correctness_check_invalid_done_values():
     with pytest.raises(SystemExit):
         log_file_correctness_check(df)
 
+""" Tests workings of parameters in logging function """
 def test_logging_no_logging_requested():
     dirs = ["/a", "/b"]
     out = logging(False, dirs)
@@ -78,21 +81,21 @@ def test_logging_create_log_file(tmp_path, capsys):
     assert (df["done"] == "no").all()
     assert "Initialising log file" in captured
 
+""" Checks if existence of log file is handled correctly """
 def test_logging_existing_log_continue(tmp_path, capsys):
     path = tmp_path
-    # choose dirs in alphabetical order so sorting in function won't change order
-    dirs = ["a", "b", "c"]
+    dirs = ["a", "b", "c"] # choose dirs in alphabetical order so sorting in function won't change order
     log_path = path / "log.csv"
-    # create an existing log file with one 'yes' and two 'no'
-    pd.DataFrame({"dir": dirs, "done": ["yes", "no", "no"]}).to_csv(log_path, index=False)
+    pd.DataFrame({"dir": dirs, "done": ["yes", "no", "no"]}).to_csv(log_path, index=False) # create an existing log file with one 'yes' and two 'no'
 
     remaining = logging(str(path), dirs)
-    captured = capsys.readouterr().out
-    # remaining should be list of dirs with done == "no" from the file (sorted by dir in function)
+    captured = capsys.readouterr().out # remaining should be list of dirs with done == "no" from the file (sorted by dir in function)
+    
     assert isinstance(remaining, list)
     assert set(remaining) == {"b", "c"}
     assert "Continue analysis where we left off" in captured
 
+""" Checks if an instance where all dirs are already analysed is handled correctly """
 def test_logging_existing_log_all_done_raises_systemexit(tmp_path):
     path = tmp_path
     dirs = ["a", "b"]
@@ -101,14 +104,12 @@ def test_logging_existing_log_all_done_raises_systemexit(tmp_path):
     with pytest.raises(SystemExit):
         logging(str(path), dirs)
 
+""" Checks if an instance where the requested folders does not match the folders in the log file is handled correctly """
 def test_logging_existing_log_mismatch_raises_systemexit(tmp_path, capsys):
     path = tmp_path
     dirs = ["a", "b", "c"]
     log_path = path / "log.csv"
-    # create log file with different folders (mismatch)
     pd.DataFrame({"dir": ["x", "y"], "done": ["no", "no"]}).to_csv(log_path, index=False)
     with pytest.raises(SystemExit):
         logging(str(path), dirs)
-    # optional: assert message printed about mismatch
-    # captured = capsys.readouterr().out
-    # assert "do not match the folders" in captured
+
