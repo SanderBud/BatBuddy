@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import glob
 import os
+import time
 import source.log as log
 import csv
 import sys
@@ -157,6 +158,7 @@ def main(
         if log_path is not False:
             log_path_csv = os.path.join(log_path, "log.csv")
             log_file = pd.read_csv(log_path_csv)
+            log_file["done"] = log_file["done"].astype("object") # Ensure column is string-compatible
             log_file.loc[log_file["dir"] == dir, "done"] = "yes"
             log_file.to_csv(log_path_csv, index=False)
 
