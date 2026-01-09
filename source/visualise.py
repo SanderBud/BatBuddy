@@ -9,7 +9,7 @@ from scipy.signal import istft, spectrogram, stft
 from source.misc import read_clean_wav
 
 
-""" Removes background noise form spectogram data """
+""" Removes background noise form spectogram data (is not used in the call prediction but can be used for visualisation purposes) """
 def spectral_subtraction(signal,    
                          noise_estimation,
                          fs,
