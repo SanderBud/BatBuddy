@@ -9,7 +9,6 @@ from scipy.signal import butter, lfilter
 
 """ Reads recording (with high-pass filter and error checks) """
 def read_clean_wav(filepath): 
-    # Suppress specific warning
     warnings.filterwarnings("ignore", category=WavFileWarning) # Throws warning for many wav files because it doesnt recognise the metadata
     
     # Load file
@@ -22,8 +21,6 @@ def read_clean_wav(filepath):
             return None, None
 
     except Exception as e:
-        # print(f"file: {filepath}, error: {e}")
-
         with open(os.path.join(os.path.dirname(filepath), "corrupted_files_log.txt"), "a") as log:
             log.write(os.path.basename(filepath) + "\t" + str(e) + "\n")
         return None, None
@@ -40,8 +37,7 @@ def read_clean_wav(filepath):
 
 """ Get dirs that contain at least one wav file """
 def get_dirs_wav(head_dir_list):
-    # Make sure head_dir is a list
-    if not isinstance(head_dir_list, list): head_dir_list = [head_dir_list]
+    if not isinstance(head_dir_list, list): head_dir_list = [head_dir_list] # Make sure head_dir is a list
 
     # Get list of paths to dirs containing wav files 
     list_dirs = set()
