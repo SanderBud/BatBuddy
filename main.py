@@ -25,15 +25,16 @@ def resource_path(rel):
 def main(
     dir_list, # Single path or list of paths
     log_path, # False or name of dir where to store/find log file
-    msg_queue=None, 
-    cancel_event=None,
-    model_path=r"model\0016_best.pt", # Location of YOLOv8 model
-    files_per_batch=10_000, # Number of recordings checked before writing to output file
+    msg_queue=None, # needed for app
+    cancel_event=None, # needed for app
+    model_path=r"model\0016_best.pt", # Location of YOLOv8 model, only change when you moved the model or want to use another one
+    files_per_batch=5_000, # Number of recordings checked before writing to output file
     output_name=False, # False or name of output name. Output name will be supplemented with the recording file index of which the output is stored in that specific file
     recursive=True, # True (if all folders should be checked recursively for wav files) or False (if only wav files in the folder paths as assigned in 'dir_list' should be analysed)
     proc=8, # Number of processors to use to speed up analysis
     overlap=0.3, # 0 when not using sliding window approach. 0.1-0.9 when using sliding window, where 0.1 if the proportion overlap between subsequent spectrograms analysed.
-    app=False):
+    app=False # needed for app
+    ):
 
     """ Preliminaries (find directories with recordings, set parameters, etc) """
     model_path_fix = resource_path(model_path)
@@ -182,9 +183,10 @@ if __name__ == "__main__":
     head_dir = r"e:\buzz"
 
     main(
-        dir_list=head_dir,
-        model_path=r"data\models\0016_best.pt",
-        log_path=head_dir,
+        dir_list=head_dir, # Single path or list of paths
+        log_path=head_dir, # False or path where to store/find log file
+        files_per_batch=10_000, # Number of recordings checked before writing to output file
+        overlap=0.3, # 0 when not using sliding window approach. 0.1-0.9 when using sliding window, where 0.1 if the proportion overlap between subsequent spectrograms analysed.
         recursive=True,
         proc=8
         )
