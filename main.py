@@ -8,6 +8,7 @@ import csv
 import sys
 import math
 import pandas as pd
+from pathlib import Path
 from ultralytics import YOLO
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
@@ -15,6 +16,10 @@ from source.misc import read_clean_wav, get_dirs_wav
 from source.predict import recording_to_predict
 from source.postprocess import overlap_tidy
 
+""" Make path to model executable-safe """
+def resource_path(rel):
+    base = Path(sys._MEIPASS) if hasattr(sys, "_MEIPASS") else Path(__file__).parent
+    return base / rel
 
 """ Main function to process all wav files """
 def main(
@@ -31,7 +36,8 @@ def main(
     app=False):
 
     """ Preliminaries (find directories with recordings, set parameters, etc) """
-    model = YOLO(model_path)
+    model_path_fix = resource_path(model_path)
+    model = YOLO(model_path_fix)
 
     if recursive: dir_list = get_dirs_wav(head_dir_list=dir_list)
     dir_list.sort()

@@ -129,6 +129,8 @@ class App:
         log_frame = ttk.LabelFrame(analysis_frame, text="Log")
         log_frame.grid(row=4, column=0, padx=25, pady=10, sticky="nsew")
 
+        log_frame.grid_columnconfigure(0, weight=1)
+
         style = ttk.Style()
         bg = style.lookup("TFrame", "background")
 
