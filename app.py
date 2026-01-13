@@ -15,7 +15,7 @@ class App:
 
         # Inititialise window 
         self.root = root                                    
-        self.root.title("BatCallr")
+        self.root.title("BatBuddy")
         self.root.geometry("1240x720")
 
         self.root.grid_rowconfigure(0, weight=1)            
