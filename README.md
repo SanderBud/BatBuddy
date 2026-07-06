@@ -1,5 +1,6 @@
+The accompanying manuscript is currently under review. To retrain the model, please see our [Zenodo repository](https://doi.org/10.5281/zenodo.20554058). Here, we stored all training and testing data, and explain how the user can retrain the model.
+
 # Installation
-(I'm aiming to eventually package the project into a simple .exe file to increase accessibility)
 
 1. Clone git repository
 2. In cmd, navigate to the repository. Change the path in the example command below.
