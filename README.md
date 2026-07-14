@@ -1,4 +1,4 @@
-The accompanying manuscript is currently under review. To retrain the model, please see our [Zenodo repository](https://doi.org/10.5281/zenodo.20554058). Here, we stored all training and testing data, and explain how the user can retrain the model.
+Find the accompanying manuscript published in Ecological Informatics [here](https://doi.org/10.1016/j.ecoinf.2026.103922). To retrain the model, please see our [Zenodo repository](https://doi.org/10.5281/zenodo.20554058). Here, we stored all training and testing data, and explain how the user can retrain the model.
 
 # Installation
 
