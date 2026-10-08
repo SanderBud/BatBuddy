@@ -53,6 +53,10 @@ def overlap_tidy(df, threshold=5):
         g2['filename'] = fname
         g2['category'] = cat
         df_out.append(g3)
+
+    if not df_out:
+        return df.copy()
+        
     df = pd.concat(df_out, ignore_index=True)
 
     # When calls start or end at the same time, take the one with the highest confidence
@@ -66,6 +70,9 @@ def overlap_tidy(df, threshold=5):
         df_out.append(best_row)
     df_out = pd.concat(df_out, ignore_index=True)
 
+    if not df_out:
+        return df.copy()
+        
     # Remove helper columns and return
     return df_out.drop(columns=['start_group', 'end_group', 'group_nr'])
 
