@@ -12,14 +12,30 @@ from pathlib import Path
 from ultralytics import YOLO
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
+import multiprocessing as mp
+import torch.multiprocessing
 from source.misc import read_clean_wav, get_dirs_wav
 from source.predict import recording_to_predict
 from source.postprocess import overlap_tidy
+
+# Linux fix: share tensors via /dev/shm instead of one file descriptor per tensor
+# (avoids "OSError: [Errno 24] Too many open files"). No effect on Windows.
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 """ Make path to model executable-safe """
 def resource_path(rel):
     base = Path(sys._MEIPASS) if hasattr(sys, "_MEIPASS") else Path(__file__).parent
     return base / rel
+
+""" Each worker process loads the model once (instead of receiving it with every file) """
+_worker_model = None
+
+def _init_worker(model_path):
+    global _worker_model
+    _worker_model = YOLO(model_path)
+
+def _predict_in_worker(file_path, **kwargs):
+    return recording_to_predict(file_path, model=_worker_model, **kwargs)
 
 """ Main function to process all wav files """
 def main(
@@ -27,7 +43,7 @@ def main(
     log_path, # False or name of dir where to store/find log file
     msg_queue=None, # needed for app
     cancel_event=None, # needed for app
-    model_path=r"model\0016_best.pt", # Location of YOLOv8 model, only change when you moved the model or want to use another one
+    model_path=os.path.join("model", "0016_best.pt"), # Location of YOLOv8 model, only change when you moved the model or want to use another one
     files_per_batch=5_000, # Number of recordings checked before writing to output file
     output_name=False, # False or name of output name. Output name will be supplemented with the recording file index of which the output is stored in that specific file
     recursive=True, # True (if all folders should be checked recursively for wav files) or False (if only wav files in the folder paths as assigned in 'dir_list' should be analysed)
@@ -38,7 +54,8 @@ def main(
 
     """ Preliminaries (find directories with recordings, set parameters, etc) """
     model_path_fix = resource_path(model_path)
-    model = YOLO(model_path_fix)
+    if not os.path.isfile(model_path_fix):
+        raise FileNotFoundError(f"Model not found: {model_path_fix}")
 
     if recursive: dir_list = get_dirs_wav(head_dir_list=dir_list)
     dir_list.sort()
@@ -55,7 +72,7 @@ def main(
 
 
     """ Analyse recordings per directory """
-    recording_to_predict_with_model = partial(recording_to_predict, model=model, output_size=1, overlap=overlap, colour_scale="jet", write_plot=False, cancel_event=cancel_event)
+    recording_to_predict_with_model = partial(_predict_in_worker, output_size=1, overlap=overlap, colour_scale="jet", write_plot=False, cancel_event=cancel_event)
 
     count_dir = 1
     for dir in dir_list_check:
@@ -105,7 +122,12 @@ def main(
             if app: msg_queue.put(("progress", f"Analysing files {start_idx+1} - {stop_idx}... "))
 
             """ Using multiprocessing to process files in parallel """
-            with ProcessPoolExecutor(max_workers=proc) as executor:
+            # "spawn" = fresh worker processes, as on Windows. Linux's default "fork" copies the
+            # threads/locks of the GUI process and can deadlock (idle workers) or break CUDA.
+            with ProcessPoolExecutor(max_workers=proc,
+                                     mp_context=mp.get_context("spawn"),
+                                     initializer=_init_worker,
+                                     initargs=(str(model_path_fix),)) as executor:
                 results = executor.map(recording_to_predict_with_model, index_file_paths)
 
                 # Track progress
