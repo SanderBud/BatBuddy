@@ -15,25 +15,33 @@ def predict_sono(model,
                  filenames,
                  wav_path,
                  save_directory=R"kaas",
-                 save=False):
+                 save=False,
+                 batch_size=int(os.environ.get("BATBUDDY_BATCH", 16))):  # images sent to the model at once
 
     if save and save_directory == R"kaas":
         raise ValueError("Define save dir before continuing")
 
+    if len(img_array) == 0:
+        return []
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    use_half = device.type == "cuda" and os.environ.get("BATBUDDY_FP16", "1") == "1"  # FP16 on GPU only
 
     subfolder_name = "img_predict"
     if save: os.makedirs(os.path.join(save_directory, subfolder_name), exist_ok=True)
 
-    # Use these values in the model.predict() call
-    results = model.predict(source=img_array, 
-                            save=save, 
-                            verbose=False,
-                            device=device,
-                            # project=os.path.join(save_directory, subfolder_name), 
-                            # name="", 
-                            conf=0.1, iou=0.4)
+    # Predict in fixed-size chunks: GPU memory no longer grows with file length
+    results = []
+    for i in range(0, len(img_array), batch_size):
+        results.extend(model.predict(source=img_array[i:i + batch_size],
+                                     save=save,
+                                     verbose=False,
+                                     device=device,
+                                     half=use_half,
+                                     # project=os.path.join(save_directory, subfolder_name),
+                                     # name="",
+                                     conf=0.1, iou=0.4))
 
     # Data to tabular format
     csv_data = []
